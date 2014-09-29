@@ -17,9 +17,6 @@ import com.sanoma.cda.geo._
 // Import MaxMind
 import com.maxmind.geoip2.DatabaseReader
 
-// Import LRU map from Twitter
-import com.twitter.util.{LruMap, SynchronizedLruMap}
-
 // Java for MaxMind
 import java.io.File
 import java.net.InetAddress
@@ -73,13 +70,6 @@ class MaxMindIpGeo(dbFile: File, lruCache: Int = 10000, synchronized: Boolean = 
     case _ : Throwable => None // we don't really care about which exception we got
   }
 
-
-  // setup cache
-  def chooseAndCreateNewLru = if (synchronized) new SynchronizedLruMap[String, Option[IpLocation]](lruCache)
-                              else new LruMap[String, Option[IpLocation]](lruCache)
-
-  private val lru = if (lruCache > 0) chooseAndCreateNewLru else null
-
   // There seem to be lot of IP addresses that give back a location that is definitely wrong
   // TODO: extend this as if the lat, long is wrong, then other things are probably wrong too
   def filterBlacklistedCoordinates(loc: IpLocation) = loc.geoPoint match {
@@ -96,32 +86,7 @@ class MaxMindIpGeo(dbFile: File, lruCache: Int = 10000, synchronized: Boolean = 
    * @param address The IP or host
    * @return Option[IpLocation]
    */
-  val getLocationWithoutLruCache = if (geoPointBlacklist.isEmpty) getLocationUnfiltered _ else getLocationFiltered _
-
-
-  /**
-   * Returns the location of given address from LRU or from DB
-   * @param address The IP or host
-   * @return Option[IpLocation]
-   */
-  def getLocationWithLruCache(address: String) = {
-    lru.get(address) match {
-      case Some(loc) => loc
-      case None => {
-        val loc = getLocationWithoutLruCache(address)
-        lru.put(address, loc)
-        loc
-      }
-    }
-  }
-
-  // finally the method that you are looking for
-  /**
-   * This is the main method that returns the Option[IpLocation] form given IP or host
-   * @return The method that provides the IpLocation from given input string representing either IP address or name
-   */
-  val getLocation: String => Option[IpLocation] = if (lruCache > 0) getLocationWithLruCache else getLocationWithoutLruCache
-
+  val getLocation: String => Option[IpLocation] = if (geoPointBlacklist.isEmpty) getLocationUnfiltered _ else getLocationFiltered _
 }
 
 

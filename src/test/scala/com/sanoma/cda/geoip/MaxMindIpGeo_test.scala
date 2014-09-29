@@ -81,28 +81,6 @@ class MaxMindIpGeo_test extends FunSuite with PropertyChecks {
       None
   )
 
-  test("getLocationWithoutLruCache") {
-    for ((address, expected) <- testData) {
-      val geo = MaxMindIpGeo(MaxMindDB, 0, false)
-      geo.getLocationWithoutLruCache(address) should be === expected
-    }
-  }
-
-  test("getLocationWithLruCache") {
-    val cacheSize = List(1000, 10000)
-
-    for (cache <- cacheSize; (address, expected) <- testData) {
-      val geo = MaxMindIpGeo(MaxMindDB, cache, false)
-      geo.getLocationWithLruCache(address) should be === expected
-    }
-
-    // again from the cache
-    for (cache <- cacheSize; (address, expected) <- testData) {
-      val geo = MaxMindIpGeo(MaxMindDB, cache, false)
-      geo.getLocationWithLruCache(address) should be === expected
-    }
-  }
-
   test("getLocation") {
     val cacheSize = List(0, 1000, 10000)
 
@@ -118,25 +96,10 @@ class MaxMindIpGeo_test extends FunSuite with PropertyChecks {
     }
   }
 
-  test("getLocationWithoutLruCache - sync") {
+  test("getLocation - sync") {
     for ((address, expected) <- testData) {
       val geo = MaxMindIpGeo(MaxMindDB, 0, true)
-      geo.getLocationWithoutLruCache(address) should be === expected
-    }
-  }
-
-  test("getLocationWithLruCache - sync") {
-    val cacheSize = List(1000, 10000)
-
-    for (cache <- cacheSize; (address, expected) <- testData) {
-      val geo = MaxMindIpGeo(MaxMindDB, cache, true)
-      geo.getLocationWithLruCache(address) should be === expected
-    }
-
-    // again from the cache
-    for (cache <- cacheSize; (address, expected) <- testData) {
-      val geo = MaxMindIpGeo(MaxMindDB, cache, true)
-      geo.getLocationWithLruCache(address) should be === expected
+      geo.getLocation(address) should be === expected
     }
   }
 
@@ -175,7 +138,7 @@ class MaxMindIpGeo_test extends FunSuite with PropertyChecks {
 
     // others should still be fine:
     for ((address, expected) <- testData.filterKeys{k => k != "213.52.50.8"}) {
-      geo.getLocationWithoutLruCache(address) should be === expected
+      geo.getLocation(address) should be === expected
     }
   }
 }
