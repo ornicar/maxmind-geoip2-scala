@@ -2,9 +2,9 @@ name := "maxmind-geoip2-scala"
 
 organization := "com.sanoma.cda"
 
-version := "1.3.0-THIB"
+version := "1.3.1-THIB"
 
-scalaVersion := "2.12.3"
+scalaVersion := "2.13.1"
 
 libraryDependencies ++= Seq(
   "com.maxmind.geoip2" % "geoip2" % "0.8.0"
